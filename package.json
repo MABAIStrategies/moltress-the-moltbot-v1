@@ -1,0 +1,10 @@
+{
+  "name": "moltbot-ops",
+  "private": true,
+  "packageManager": "pnpm@9.0.0",
+  "scripts": {
+    "lint": "echo 'add lint runners'",
+    "test": "echo 'add tests'",
+    "openapi:lint": "bash scripts/lint-openapi.sh"
+  }
+}
