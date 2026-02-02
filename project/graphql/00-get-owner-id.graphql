@@ -1,0 +1,7 @@
+query($owner: String!) {
+  repositoryOwner(login: $owner) {
+    __typename
+    id
+    login
+  }
+}
