@@ -1,0 +1,49 @@
+name: MoltBot Ops — Delivery
+description: >
+  Enterprise-grade setup + monitoring + operations console for MoltBot-like services.
+fields:
+  - name: Status
+    type: single_select
+    options: [Backlog, Ready, In Progress, Review, QA, Security Review, Done]
+  - name: Phase
+    type: single_select
+    options: [Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, Phase 6, Phase 7]
+  - name: Component
+    type: single_select
+    options: [Agent, Web, Mobile, SDK, Docs, Infra]
+  - name: Priority
+    type: single_select
+    options: [P0, P1, P2, P3]
+  - name: Risk
+    type: single_select
+    options: [Low, Medium, High]
+  - name: Sprint
+    type: text
+views:
+  - name: Board
+    type: board
+    group_by: Status
+  - name: Roadmap
+    type: roadmap
+    group_by: Phase
+  - name: Triage
+    type: table
+    sort:
+      - field: Priority
+        order: asc
+automation:
+  - trigger: issue_opened
+    action:
+      set_field:
+        Status: Backlog
+  - trigger: pull_request_opened
+    action:
+      set_field:
+        Status: Review
+  - trigger: pull_request_merged
+    action:
+      set_field:
+        Status: Done
+workflows:
+  - name: Standard
+    states: [Backlog, Ready, In Progress, Review, QA, Security Review, Done]

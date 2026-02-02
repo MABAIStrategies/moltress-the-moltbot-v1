@@ -1,0 +1,141 @@
+Title,Body,Labels,Milestone,Priority,Component,Phase,Risk
+Agent: scaffold service with config + structured logging,"Create the Ops Agent service skeleton.
+- Choose language (Go preferred) and define internal module boundaries.
+- Add structured logging (JSON) + log levels.
+- Provide config loading with safe defaults.
+
+Acceptance:
+- `agent` starts locally and serves /health.
+- Logs are structured and do not leak secrets.","type:feature,component:agent,phase:1,priority:P0",Phase 1 — Foundations,P0,Agent,Phase 1,Medium
+API: implement /health and system info endpoint,"Implement:
+- GET /health (public)
+- GET /system/info (auth required)
+
+Acceptance:
+- /system/info includes OS, arch, cpu, mem, disk, hostname.","type:feature,component:agent,phase:1,priority:P0",Phase 1 — Foundations,P0,Agent,Phase 1,Low
+Auth: pairing flow endpoints /pair/start and /pair/confirm,"Implement pairing:
+- POST /pair/start returns short-lived code
+- POST /pair/confirm exchanges code + device name for access token
+
+Acceptance:
+- Codes expire.
+- Tokens are short-lived.
+- Pairing is rate-limited.","type:security,component:agent,phase:1,priority:P0",Phase 1 — Foundations,P0,Agent,Phase 1,High
+Web: pairing screen + store session token securely,"Build minimal web UI:
+- Pairing code entry
+- Persist token securely (httpOnly cookies if server-backed; otherwise encrypted local storage)
+
+Acceptance:
+- Can call /system/info and display result.","type:feature,component:web,phase:1,priority:P1",Phase 1 — Foundations,P1,Web,Phase 1,Medium
+Mobile: pairing + status screen (minimal),"Build minimal mobile UI:
+- Pairing code entry
+- Show status tiles (gateway, running, uptime placeholder)
+
+Acceptance:
+- Token stored in secure storage.","type:feature,component:mobile,phase:1,priority:P1",Phase 1 — Foundations,P1,Mobile,Phase 1,Medium
+OpenAPI: add contract tests and lint,"Add:
+- openapi lint step
+- contract tests that ensure server responses conform to openapi.yaml
+
+Acceptance:
+- CI fails on spec drift.","type:chore,component:docs,phase:1,priority:P1",Phase 1 — Foundations,P1,Docs,Phase 1,Low
+Wizard: implement setup flow state machine (shared spec),"Create a shared wizard state machine used by web and mobile.
+Steps: choose setup, prerequisites, install, configure, validate, run, report.
+
+Acceptance:
+- Deterministic step transitions.
+- Persist/restore wizard state.","type:feature,component:shared,phase:2,priority:P0",Phase 2 — Setup Wizard,P0,Docs,Phase 2,Medium
+"Agent: local install endpoints /install/local (brew, npm, docker)","Implement installer engine.
+- Idempotent installs
+- Captures install logs
+- Returns job_id
+
+Acceptance:
+- Fresh machine path works (documented).","type:feature,component:agent,phase:2,priority:P0",Phase 2 — Setup Wizard,P0,Agent,Phase 2,High
+Config: schema + /config/validate + /config/apply with backups,"Define config schema and validation rules.
+- /config/apply creates backup by default
+- returns backup_id
+
+Acceptance:
+- Invalid configs never apply
+- Backup created for every apply","type:security,component:agent,phase:2,priority:P0",Phase 2 — Setup Wizard,P0,Agent,Phase 2,High
+Web: setup wizard UI with progress and inline validation,"Implement wizard screens and progress UI.
+- Preflight checks
+- Install progress
+- Config builder
+
+Acceptance:
+- Can complete local install flow end-to-end.","type:feature,component:web,phase:2,priority:P1",Phase 2 — Setup Wizard,P1,Web,Phase 2,Medium
+Logs: implement /logs/tail and /logs/stream (SSE) with redaction,"Implement log tail and streaming.
+- Redaction pipeline on by default
+- Filters and line limits
+
+Acceptance:
+- No tokens/keys appear in responses.","type:security,component:agent,phase:3,priority:P0",Phase 3 — Monitoring,P0,Agent,Phase 3,High
+Metrics: implement /metrics/current and dashboard tiles,"Expose host metrics and moltbot metrics where possible.
+Acceptance:
+- CPU/mem/disk/uptime populated.","type:feature,component:agent,phase:3,priority:P1",Phase 3 — Monitoring,P1,Agent,Phase 3,Medium
+Support: generate diagnostics bundle /support/bundle,"Create redacted support bundle zip.
+Includes:
+- system info
+- last 500 logs
+- config redacted
+- install history
+- manifest.json
+
+Acceptance:
+- Bundle generated < 10s on typical machine.","type:feature,component:agent,phase:3,priority:P1",Phase 3 — Monitoring,P1,Agent,Phase 3,Medium
+Ops: implement /ops/action for start/stop/restart,"Implement safe controls.
+- Audit log entry per action
+- Verify result after action
+
+Acceptance:
+- Restart returns success only if process is healthy.","type:feature,component:agent,phase:4,priority:P0",Phase 4 — Operations,P0,Agent,Phase 4,High
+Ops: backup/restore/rollback flows with encrypted backups,"Backups encrypted at rest.
+Rollback supports:
+- config rollback
+- version rollback (where possible)
+
+Acceptance:
+- One-click revert to last known-good.","type:security,component:agent,phase:4,priority:P0",Phase 4 — Operations,P0,Agent,Phase 4,High
+AI: implement context packet builder and evidence-cited responses,"Create a curated context packet:
+- status
+- recent logs (redacted)
+- config validation results
+- install history
+AI must cite which fields/log ranges informed conclusions.
+
+Acceptance:
+- No raw secrets in AI context.
+- Responses include evidence section.","type:security,component:agent,phase:5,priority:P0",Phase 5 — AI Help,P0,Agent,Phase 5,High
+Web/Mobile: AI chat UI + Proposed Actions confirmation UX,"Add AI chat and proposed action cards.
+Actions require explicit confirmation and show preflight/impact.
+
+Acceptance:
+- No action executes without explicit user approval.","type:feature,component:web,phase:5,priority:P1",Phase 5 — AI Help,P1,Web,Phase 5,Medium
+Remote: support TLS + reverse proxy guidance and verification,"Provide remote mode behind TLS.
+Agent verifies:
+- TLS enabled
+- strong auth
+- warns on public exposure
+
+Acceptance:
+- Remote mode blocked without TLS.","type:security,component:agent,phase:6,priority:P0",Phase 6 — Remote + Fleet,P0,Agent,Phase 6,High
+Fleet: multi-node registry and node switcher UI,"Support multiple nodes.
+- Add node registry
+- Node selector UI
+- Per-node alerts
+
+Acceptance:
+- Switching nodes updates dashboards reliably.","type:feature,component:web,phase:6,priority:P1",Phase 6 — Remote + Fleet,P1,Web,Phase 6,Medium
+Packaging: signed installers and auto-update strategy,"Create signed packages and safe update mechanism for agent.
+Acceptance:
+- Upgrade can roll back on failure.","type:feature,component:infra,phase:7,priority:P1",Phase 7 — Hardening,P1,Infra,Phase 7,High
+Compliance: security posture docs + incident response runbook,"Document:
+- threat model
+- security controls
+- incident response
+- logging/privacy policy
+
+Acceptance:
+- Docs are complete and shippable.","type:docs,component:docs,phase:7,priority:P1",Phase 7 — Hardening,P1,Docs,Phase 7,Medium

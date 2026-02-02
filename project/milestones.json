@@ -1,0 +1,37 @@
+[
+  {
+    "title": "Phase 1 \u2014 Foundations",
+    "description": "Agent pairing + read-only status",
+    "due_on": null
+  },
+  {
+    "title": "Phase 2 \u2014 Setup Wizard",
+    "description": "Deterministic install + config validation",
+    "due_on": null
+  },
+  {
+    "title": "Phase 3 \u2014 Monitoring",
+    "description": "Logs/metrics/alerts/support bundle",
+    "due_on": null
+  },
+  {
+    "title": "Phase 4 \u2014 Operations",
+    "description": "Safe controls + upgrades + backups + rollback",
+    "due_on": null
+  },
+  {
+    "title": "Phase 5 \u2014 AI Help",
+    "description": "Grounded AI + propose actions",
+    "due_on": null
+  },
+  {
+    "title": "Phase 6 \u2014 Remote + Fleet",
+    "description": "Secure remote access + multi-node",
+    "due_on": null
+  },
+  {
+    "title": "Phase 7 \u2014 Hardening",
+    "description": "Packaging, compliance docs, stability",
+    "due_on": null
+  }
+]

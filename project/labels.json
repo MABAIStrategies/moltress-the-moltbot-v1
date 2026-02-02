@@ -1,0 +1,117 @@
+[
+  {
+    "name": "component:agent",
+    "color": "0E8A16",
+    "description": "Ops Agent service"
+  },
+  {
+    "name": "component:web",
+    "color": "1D76DB",
+    "description": "Web console"
+  },
+  {
+    "name": "component:mobile",
+    "color": "5319E7",
+    "description": "Mobile app"
+  },
+  {
+    "name": "component:sdk",
+    "color": "FBCA04",
+    "description": "SDK / generated client"
+  },
+  {
+    "name": "component:docs",
+    "color": "C5DEF5",
+    "description": "Documentation"
+  },
+  {
+    "name": "component:infra",
+    "color": "BFDADC",
+    "description": "Infrastructure / CI-CD"
+  },
+  {
+    "name": "type:feature",
+    "color": "0052CC",
+    "description": "New feature"
+  },
+  {
+    "name": "type:bug",
+    "color": "D73A4A",
+    "description": "Bug fix"
+  },
+  {
+    "name": "type:chore",
+    "color": "A2EEEF",
+    "description": "Chore / maintenance"
+  },
+  {
+    "name": "type:security",
+    "color": "B60205",
+    "description": "Security-related"
+  },
+  {
+    "name": "priority:P0",
+    "color": "B60205",
+    "description": "Must do now"
+  },
+  {
+    "name": "priority:P1",
+    "color": "D93F0B",
+    "description": "High priority"
+  },
+  {
+    "name": "priority:P2",
+    "color": "FBCA04",
+    "description": "Medium priority"
+  },
+  {
+    "name": "priority:P3",
+    "color": "0E8A16",
+    "description": "Low priority"
+  },
+  {
+    "name": "phase:1",
+    "color": "7057FF",
+    "description": "Phase 1 work item"
+  },
+  {
+    "name": "phase:2",
+    "color": "7057FF",
+    "description": "Phase 2 work item"
+  },
+  {
+    "name": "phase:3",
+    "color": "7057FF",
+    "description": "Phase 3 work item"
+  },
+  {
+    "name": "phase:4",
+    "color": "7057FF",
+    "description": "Phase 4 work item"
+  },
+  {
+    "name": "phase:5",
+    "color": "7057FF",
+    "description": "Phase 5 work item"
+  },
+  {
+    "name": "phase:6",
+    "color": "7057FF",
+    "description": "Phase 6 work item"
+  },
+  {
+    "name": "phase:7",
+    "color": "7057FF",
+    "description": "Phase 7 work item"
+  },
+  {
+    "name": "type:docs",
+    "color": "C5DEF5",
+    "description": "Documentation deliverable"
+  },
+  {
+    "name": "type:design",
+    "color": "E99695",
+    "description": "Design / UX / motion"
+  }
+]
