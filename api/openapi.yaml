@@ -1,0 +1,545 @@
+openapi: 3.0.3
+info:
+  title: MoltBot Ops Agent API
+  version: 0.1.0
+  description: >
+    Local-first API for installing, configuring, monitoring, and operating MoltBot.
+    Default deployment is loopback-only. Remote access must be explicitly enabled and secured.
+servers:
+  - url: http://127.0.0.1:7337
+    description: Local agent (loopback only)
+security:
+  - bearerAuth: []
+tags:
+  - name: Pairing
+  - name: System
+  - name: MoltBot
+  - name: Install
+  - name: Config
+  - name: Logs
+  - name: Metrics
+  - name: Alerts
+  - name: Operations
+  - name: Support
+
+paths:
+  /health:
+    get:
+      tags: [System]
+      summary: Health check
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+
+  /pair/start:
+    post:
+      tags: [Pairing]
+      summary: Start pairing and generate a short-lived pairing code
+      security: []
+      responses:
+        "200":
+          description: Pairing started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PairStartResponse"
+
+  /pair/confirm:
+    post:
+      tags: [Pairing]
+      summary: Confirm pairing with code and mint session tokens
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PairConfirmRequest"
+      responses:
+        "200":
+          description: Paired
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthTokens"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /system/info:
+    get:
+      tags: [System]
+      summary: Get host system information
+      responses:
+        "200":
+          description: System info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemInfo"
+
+  /moltbot/status:
+    get:
+      tags: [MoltBot]
+      summary: Get MoltBot service status and detected version/config path
+      responses:
+        "200":
+          description: Status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MoltBotStatus"
+
+  /install/local:
+    post:
+      tags: [Install]
+      summary: Install MoltBot locally using a supported method
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InstallLocalRequest"
+      responses:
+        "202":
+          description: Install started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobAccepted"
+
+  /install/ssh:
+    post:
+      tags: [Install]
+      summary: Install MoltBot on a remote host over SSH (VPS path)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InstallSshRequest"
+      responses:
+        "202":
+          description: Install started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobAccepted"
+
+  /config/validate:
+    post:
+      tags: [Config]
+      summary: Validate a proposed configuration without applying it
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfigValidateRequest"
+      responses:
+        "200":
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigValidationResult"
+
+  /config/apply:
+    post:
+      tags: [Config]
+      summary: Apply configuration (creates backup first)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfigApplyRequest"
+      responses:
+        "200":
+          description: Applied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigApplyResult"
+
+  /logs/tail:
+    get:
+      tags: [Logs]
+      summary: Get last N log lines (redacted by default)
+      parameters:
+        - in: query
+          name: lines
+          schema: { type: integer, minimum: 10, maximum: 5000, default: 200 }
+        - in: query
+          name: redact
+          schema: { type: boolean, default: true }
+      responses:
+        "200":
+          description: Log lines
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogTailResponse"
+
+  /logs/stream:
+    get:
+      tags: [Logs]
+      summary: Stream logs via Server-Sent Events (SSE)
+      description: >
+        SSE stream of log lines. Use EventSource in web clients.
+        For mobile, consider a websocket variant in implementation.
+      parameters:
+        - in: query
+          name: redact
+          schema: { type: boolean, default: true }
+      responses:
+        "200":
+          description: SSE stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+
+  /metrics/current:
+    get:
+      tags: [Metrics]
+      summary: Get current metrics snapshot
+      responses:
+        "200":
+          description: Metrics snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetricsSnapshot"
+
+  /alerts/rules:
+    get:
+      tags: [Alerts]
+      summary: List alert rules
+      responses:
+        "200":
+          description: Rules
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlertRules"
+    post:
+      tags: [Alerts]
+      summary: Create or update an alert rule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AlertRule"
+      responses:
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlertRule"
+
+  /ops/action:
+    post:
+      tags: [Operations]
+      summary: Execute a safe operational action (requires confirmation token for destructive actions)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OpsActionRequest"
+      responses:
+        "200":
+          description: Result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpsActionResult"
+
+  /support/bundle:
+    post:
+      tags: [Support]
+      summary: Generate a redacted support bundle (zip)
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SupportBundleRequest"
+      responses:
+        "200":
+          description: Bundle metadata + download URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SupportBundleResponse"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+    Health:
+      type: object
+      properties:
+        status: { type: string, example: ok }
+        time: { type: string, format: date-time }
+      required: [status, time]
+
+    PairStartResponse:
+      type: object
+      properties:
+        pairing_code:
+          type: string
+          description: Short-lived code shown to user
+          example: "482-119"
+        expires_in_seconds:
+          type: integer
+          example: 180
+      required: [pairing_code, expires_in_seconds]
+
+    PairConfirmRequest:
+      type: object
+      properties:
+        pairing_code: { type: string }
+        device_name: { type: string }
+      required: [pairing_code, device_name]
+
+    AuthTokens:
+      type: object
+      properties:
+        access_token: { type: string }
+        expires_in_seconds: { type: integer }
+        refresh_token: { type: string }
+      required: [access_token, expires_in_seconds]
+
+    SystemInfo:
+      type: object
+      properties:
+        os: { type: string, example: macos }
+        os_version: { type: string }
+        arch: { type: string, example: arm64 }
+        cpu_cores: { type: integer }
+        memory_bytes: { type: integer }
+        disk_free_bytes: { type: integer }
+        hostname: { type: string }
+      required: [os, os_version, arch, cpu_cores, memory_bytes, disk_free_bytes, hostname]
+
+    MoltBotStatus:
+      type: object
+      properties:
+        installed: { type: boolean }
+        running: { type: boolean }
+        version: { type: string, nullable: true }
+        service_manager: { type: string, example: systemd }
+        config_path: { type: string, nullable: true }
+        last_start_time: { type: string, format: date-time, nullable: true }
+        restart_count_24h: { type: integer, example: 0 }
+        gateway_connected: { type: boolean, example: true }
+      required: [installed, running, service_manager, gateway_connected]
+
+    InstallLocalRequest:
+      type: object
+      properties:
+        method:
+          type: string
+          enum: [brew, npm, docker]
+        channel:
+          type: string
+          description: Release channel
+          enum: [stable, beta, nightly]
+          default: stable
+      required: [method]
+
+    InstallSshRequest:
+      type: object
+      properties:
+        host: { type: string, example: 203.0.113.10 }
+        port: { type: integer, default: 22 }
+        username: { type: string }
+        auth:
+          type: object
+          properties:
+            type: { type: string, enum: [password, key] }
+            password: { type: string, nullable: true }
+            private_key_pem: { type: string, nullable: true }
+          required: [type]
+        method:
+          type: string
+          enum: [docker, native]
+          default: docker
+      required: [host, username, auth]
+
+    JobAccepted:
+      type: object
+      properties:
+        job_id: { type: string }
+        status: { type: string, example: accepted }
+      required: [job_id, status]
+
+    ConfigValidateRequest:
+      type: object
+      properties:
+        config:
+          type: object
+          additionalProperties: true
+      required: [config]
+
+    ConfigValidationResult:
+      type: object
+      properties:
+        valid: { type: boolean }
+        errors:
+          type: array
+          items: { $ref: "#/components/schemas/ConfigError" }
+        warnings:
+          type: array
+          items: { $ref: "#/components/schemas/ConfigError" }
+      required: [valid, errors, warnings]
+
+    ConfigError:
+      type: object
+      properties:
+        path: { type: string, example: "gateway.url" }
+        message: { type: string }
+        severity: { type: string, enum: [error, warning] }
+      required: [path, message, severity]
+
+    ConfigApplyRequest:
+      type: object
+      properties:
+        config:
+          type: object
+          additionalProperties: true
+        backup_before_apply:
+          type: boolean
+          default: true
+      required: [config]
+
+    ConfigApplyResult:
+      type: object
+      properties:
+        applied: { type: boolean }
+        backup_id: { type: string, nullable: true }
+        next_steps:
+          type: array
+          items: { type: string }
+      required: [applied, next_steps]
+
+    LogTailResponse:
+      type: object
+      properties:
+        lines:
+          type: array
+          items: { type: string }
+        redacted: { type: boolean }
+      required: [lines, redacted]
+
+    MetricsSnapshot:
+      type: object
+      properties:
+        cpu_percent: { type: number, format: float }
+        mem_percent: { type: number, format: float }
+        disk_free_bytes: { type: integer }
+        uptime_seconds: { type: integer }
+        restart_count_24h: { type: integer }
+      required: [cpu_percent, mem_percent, disk_free_bytes, uptime_seconds, restart_count_24h]
+
+    AlertRule:
+      type: object
+      properties:
+        id: { type: string, nullable: true }
+        name: { type: string }
+        enabled: { type: boolean, default: true }
+        condition:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [gateway_disconnected, crash_loop, disk_low, auth_failures]
+            threshold:
+              type: integer
+              nullable: true
+          required: [type]
+        notify:
+          type: object
+          properties:
+            channels:
+              type: array
+              items:
+                type: string
+                enum: [in_app, email, webhook, push]
+            webhook_url: { type: string, nullable: true }
+            email: { type: string, nullable: true }
+          required: [channels]
+      required: [name, enabled, condition, notify]
+
+    AlertRules:
+      type: object
+      properties:
+        rules:
+          type: array
+          items: { $ref: "#/components/schemas/AlertRule" }
+      required: [rules]
+
+    OpsActionRequest:
+      type: object
+      properties:
+        action:
+          type: string
+          enum: [start, stop, restart, upgrade, backup, restore, rollback]
+        params:
+          type: object
+          additionalProperties: true
+        confirmation_token:
+          type: string
+          nullable: true
+      required: [action]
+
+    OpsActionResult:
+      type: object
+      properties:
+        ok: { type: boolean }
+        message: { type: string }
+        audit_event_id: { type: string }
+        job_id: { type: string, nullable: true }
+      required: [ok, message, audit_event_id]
+
+    SupportBundleRequest:
+      type: object
+      properties:
+        include_logs: { type: boolean, default: true }
+        include_config_redacted: { type: boolean, default: true }
+        include_metrics: { type: boolean, default: true }
+
+    SupportBundleResponse:
+      type: object
+      properties:
+        bundle_id: { type: string }
+        download_url: { type: string }
+        redacted: { type: boolean }
+      required: [bundle_id, download_url, redacted]
+
+    Error:
+      type: object
+      properties:
+        code: { type: string, example: unauthorized }
+        message: { type: string }
+      required: [code, message]
