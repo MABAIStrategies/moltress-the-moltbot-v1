@@ -3,8 +3,25 @@
   "private": true,
   "packageManager": "pnpm@9.0.0",
   "scripts": {
-    "lint": "echo 'add lint runners'",
-    "test": "echo 'add tests'",
-    "openapi:lint": "bash scripts/lint-openapi.sh"
+    "dev": "concurrently -n agent,web -c blue,magenta \"pnpm --filter @moltbot/agent dev\" \"pnpm --filter @moltbot/web dev\"",
+    "dev:all": "pnpm dev",
+    "lint": "biome check .",
+    "format": "biome format . --write",
+    "format:check": "biome format . --check",
+    "typecheck": "pnpm --filter @moltbot/agent typecheck && pnpm --filter @moltbot/web typecheck",
+    "test": "pnpm --filter @moltbot/agent test",
+    "test:unit": "pnpm --filter @moltbot/agent test:unit",
+    "test:contract": "pnpm --filter @moltbot/agent test:contract",
+    "test:e2e": "pnpm --filter @moltbot/agent test:e2e",
+    "openapi:lint": "bash scripts/lint-openapi.sh",
+    "openapi:gen": "bash scripts/gen-sdk.sh",
+    "secret:scan": "bash scripts/secret-scan.sh",
+    "gates:phase01": "bash scripts/gates-phase01.sh"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "concurrently": "8.2.2",
+    "openapi-typescript": "7.5.0",
+    "swagger-cli": "4.0.4"
   }
 }

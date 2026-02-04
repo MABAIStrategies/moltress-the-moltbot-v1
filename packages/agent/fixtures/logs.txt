@@ -1,0 +1,5 @@
+2024-01-01T00:00:00Z [info] gateway connected
+2024-01-01T00:00:01Z [info] bot started
+2024-01-01T00:00:02Z [warn] retrying upstream request
+2024-01-01T00:00:03Z [info] heartbeat ok
+2024-01-01T00:00:04Z [error] transient network issue
